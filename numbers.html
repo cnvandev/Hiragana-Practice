@@ -1,0 +1,272 @@
+﻿<html>
+	<head>
+		<title>Hiragana Number Generator</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/scriptaculous.js"></script>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<script type="text/javascript">
+			var last_number;
+			var initial_delay;
+			var speed;
+			var split_into_rows;
+			
+			// Returns the hiragana for the specified simple number (single digits or powers of 10 only). If a second parameter is set, it will force on version (for example, きゅう or く is used for single digits, but only きゅうじゅ is used.
+			function get_hiragana(number, which) {
+				var hiragana_numbers = new Array();
+				hiragana_numbers[0] = "れい";
+				hiragana_numbers[1] = "いち";
+				hiragana_numbers[2] = "に";
+				hiragana_numbers[3] = "さん";
+				hiragana_numbers[4] = "よん";
+				hiragana_numbers[5] = "ご";
+				hiragana_numbers[6] = "ろく";
+				hiragana_numbers[7] = "なな";
+				hiragana_numbers[8] = "はち";
+				hiragana_numbers[9] = ["きゅう", "く"];
+				hiragana_numbers[10] = "じゅう";
+				hiragana_numbers[100] = ["ひゃく", "びゃく", "ぴゃく"];
+				hiragana_numbers[1000] = ["せん", "ぜん"];
+				hiragana_numbers[10000] = "まん";
+				
+				var the_number = hiragana_numbers[number];
+				if (the_number instanceof Array) {
+					if (which === undefined) var which = Math.floor(Math.random()*the_number.length);
+					return the_number[which];
+				} else {
+					return the_number;
+				}
+			}
+			
+			// Converts a roomaji number into a Hiragana number.
+			function number_to_hiragana(number) {
+				number = number.toString().split("").reverse();
+				hiragana_string = "";
+				
+				// For each digit in the number, write out the appropriate Hiragana.
+				for (var i = number.length; i >= 0; i--) {
+					if (i == 4) {				// Special conditions for ten-thousands.
+						if (number[4] > 0) {
+							hiragana_string += "<span class='number' id='10000'>";
+							if (number[4] == 9) {
+								hiragana_string += get_hiragana(9, 0);
+							} else if (number[4] == 7) {
+								hiragana_string += get_hiragana(7, 0);
+							} else if (number[4] == 4) {
+								hiragana_string += get_hiragana(4, 0);
+							} else {
+								hiragana_string += get_hiragana(number[4]);
+							}
+							hiragana_string += get_hiragana(10000);
+							hiragana_string += "</span>";
+						}
+					} else if (i == 3) {	// Special conditions for thousands.
+						// We write "せん" instead of "いっせん," and we don't need it if it's 0.
+						if (number[3] > 0) {
+							hiragana_string += "<span class='number' id='1000'>";
+							// Tons of exceptions.
+							if (number[3] == 9) {
+								hiragana_string += get_hiragana(9, 0);
+								hiragana_string += get_hiragana(1000, 0);
+							} else if (number[3] == 8) {
+								hiragana_string += get_hiragana(8, 0).substr(0,1) + "っ";
+								hiragana_string += get_hiragana(1000, 0);
+							} else if (number[3] == 7) {
+								hiragana_string += get_hiragana(7, 0);
+								hiragana_string += get_hiragana(1000, 0);
+							} else if (number[3] == 4) {
+								hiragana_string += get_hiragana(4, 0);
+								hiragana_string += get_hiragana(1000, 0);
+							} else if (number[3] == 3) {
+								hiragana_string += get_hiragana(3, 0);
+								hiragana_string += get_hiragana(1000, 1);
+							} else if (number[3] == 1) {
+								hiragana_string += get_hiragana(1000, 0);
+							} else {
+								hiragana_string += get_hiragana(number[3]);
+								hiragana_string += get_hiragana(1000, 0);
+							}
+							hiragana_string += "</span>";
+						}
+					} else if (i == 2) {	// Special conditions for hundreds.
+						// We write "ひゃく" instead of "いちひゃく," and we don't need it if it's 0.
+						if (number[2] > 0) {
+							hiragana_string += "<span class='number' id='100'>";
+							// So many exceptions...
+							if (number[2] == 9) {
+								hiragana_string += get_hiragana(9, 0);
+								hiragana_string += get_hiragana(100, 0);
+							} else if (number[2] == 8) {
+								hiragana_string += get_hiragana(8, 0).substr(0,1) + "っ";
+								hiragana_string += get_hiragana(100, 2);
+							} else if (number[2] == 7) {
+								hiragana_string += get_hiragana(7, 0);
+								hiragana_string += get_hiragana(100, 0);
+							} else if (number[2] == 6) {
+								hiragana_string += get_hiragana(6, 0).substr(0,1) + "っ";
+								hiragana_string += get_hiragana(100, 2);
+							} else if (number[2] == 4) {
+								hiragana_string += get_hiragana(4, 0);
+								hiragana_string += get_hiragana(100, 0);
+							} else if (number[2] == 3) {
+								hiragana_string += get_hiragana(3, 0);
+								hiragana_string += get_hiragana(100, 1);
+							} else if (number[2] == 1) {
+								hiragana_string += get_hiragana(100, 0);
+							} else {
+								hiragana_string += get_hiragana(number[2]);
+								hiragana_string += get_hiragana(100, 0);
+							}
+							hiragana_string += "</span>";
+						}
+					} else if (i == 1) {	// Special conditions for the tens.
+						// We write "じゅ" instead of "いちじゅ," and we don't need it if it's 0.
+						if (number[1] > 0) {
+							hiragana_string += "<span class='number' id='10'>";
+							if (number[1] == 9) {
+								hiragana_string += get_hiragana(9, 0);
+							} else if (number[1] == 7) {
+								hiragana_string += get_hiragana(7, 0);
+							} else if (number[1] == 4) {
+								hiragana_string += get_hiragana(4, 0);
+							} else if (number[1] == 1) {
+								// Nothing - no number required, just use the 10.
+							} else {
+								hiragana_string += get_hiragana(number[1]);
+							}
+							hiragana_string += get_hiragana(10);
+							hiragana_string += "</span>";
+						}
+					} else if (i == 0) {	// Special conditions for ones.
+						// If it's the only number, write れ; else we can ignore it.
+						if (!((number.length != 1) && (number[0] == 0))) {
+							hiragana_string += "<span class='number' id='1'>";
+							hiragana_string += get_hiragana(number[0]);
+							hiragana_string += "</span>";
+						}
+					}
+				}
+				return hiragana_string;
+			}
+			
+			// Runs the number game.
+			function number_game(number) {
+				var hiragana = number_to_hiragana(number);
+				$("the_number").update(hiragana);
+				var answer = new Element("span").update(" = " + number).hide();
+				$("the_number").insert({bottom: answer});
+				Element.appear.delay((initial_delay + speed*hiragana.length), $("the_number").down("span"));
+			}
+			
+			// Generates a random number that's not *perfectly* random, but will be different every time. Lower bound is 0, upper bound is the value of the "upper bound" input box.
+			function random_number() {
+				var top = $("upper_bound").value;
+				
+				if (top > 100000) {
+					alert("Sorry, only numbers up to 100,000 are allowed for now!");
+					top = 100000;
+					$("upper_bound").value = 100000;
+				}
+				
+				// Generate the random number and make sure it's not the last one I used...
+				var number = Math.floor(Math.random()*top);
+				if (number == last_number) {
+					return random_number();
+				} else {
+					last_number = number;
+					return number;
+				}
+			}
+			
+			// Sets the game to "Easy mode," "Medium mode," or "Hard mode."
+			function set_mode(mode) {
+				if (mode == "easy") {
+					initial_delay = 0.75;
+					speed = 0.75;
+					$("easy").checked = true;
+				} else if (mode == "medium") {
+					initial_delay = 1;
+					speed = 0.25;
+					$("medium").checked = true;
+				} else if (mode == "hard") {
+					initial_delay = 0.5;
+					speed = 0.2;
+					$("hard").checked = true;
+				}
+			}
+			
+			// "Dictionary Mode" - looks up a number for you.
+			function number_lookup() {
+				var number = $("lookup").value;
+				if (number == "") {
+					number = 0;
+				} else if (parseInt(number, 10) > 100000) {
+					alert("Can't deal with numbers that high, sorry!");
+					return;
+				}
+				
+				var hiragana = number_to_hiragana(number);
+				$("the_number").update(hiragana);
+				var answer = new Element("span").update(" = " + number);
+				$("the_number").insert({bottom: answer});
+			}
+			
+			// Change the value of the split setting.
+			function change_split() {
+				if ($("split").checked == false)
+					
+				else 
+					
+			}
+			
+			// Start the game once the page is loaded!
+			document.observe("dom:loaded", function() {
+				split_into_rows = $("split").checked;
+				set_mode('easy');
+				number_game(random_number());
+			});
+		</script>
+		<style type="text/css">
+			body {
+				margin: 2em 0em;
+				padding: 0em;
+				text-align:center;
+				font-family: Arial;
+			}
+				
+			.number {
+				width: 65em;
+				margin: 3em auto;
+				text-align: left;
+				padding: 1.5em;
+				border: 1px dashed #333;
+				background-color: #eee;
+			}
+			
+			#the_number {
+				font-size: 36pt;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>ひらがな Number Game</h1>
+		<div class="number">
+			<span id="the_number"></span><br>
+			<button onClick="number_game(random_number());">New Number!</button>
+			<p>
+				Numbers from 0 to <input type="text" length="5" id="upper_bound" value="100">
+				<input type="radio" value="easy" name="mode" id="easy" onClick="set_mode('easy');"><label for="easy">Easy Mode</label>
+				<input type="radio" value="easy" name="mode" id="medium" onClick="set_mode('medium');"><label for="medium">Medium Mode</label>
+				<input type="radio" value="easy" name="mode" id="hard" onClick="set_mode('hard');"><label for="hard">Hard Mode</label>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="checkbox" onClick="change_split();" id="split"><label for="split">Split into rows next time.</label>
+			</p>
+			<p align="right">
+				Number Look-up: <input type="text" length="5" id="lookup" value="">
+				<button onClick="number_lookup();">Look-up</button>
+		</div>
+		<p>
+			This is a Hiragana number game! Guess what the ひらがな number is before time runs out and the answer is given! Longer numbers give you more time to think.<br>
+			I've tried to find every bug I could get, but there might still be some exceptions I've missed. If you find one, send me an email at <a href="mailto:chris.vandevelde@uwaterloo.ca">chris.vandevelde@uwaterloo.ca</a>.
+		</p>
+	</body>
+</html>

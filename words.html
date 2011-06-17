@@ -1,0 +1,456 @@
+﻿<html>
+	<head>
+		<title>Hiragana Practice!</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.3/scriptaculous.js"></script>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<script type="text/javascript">
+			var last_number;
+			var initial_delay;
+			var speed;
+			var current_words;
+			var forwards = false;
+			
+			var time_expressions = {
+				// Days
+				"day before yesterday": "おととい",
+				"yesterday": "きのう",
+				"today": "きょう",
+				"tomorrow": "あした",
+				"day after tomorrow": "あさって",
+				
+				// Weeks
+				"week before last": "せんせんしゅう",
+				"last week": "せんしゅう",
+				"this week": "こんしゅう",
+				"next week": "らいしゅう",
+				"week after next": "さらいしゅう",
+				
+				// Months
+				"month before last": "せんせんげつ",
+				"last month": "せんげつ",
+				"this month": "こんげつ",
+				"next month": "らいげつ",
+				"month after next": "さらいげつ",
+				
+				// Years
+				"year before last": "おととし",
+				"last year": "きょねん",
+				"this year": "ことし",
+				"next year": "らいねん",
+				"year after next": "さらいねん"
+			};
+			
+			var frequency_modifiers = {
+				"always": "いつも",
+				"everyday": "まいにち",
+				"often": "よく",
+				"sometimes": "ときどき",
+				"not much": "あまり",
+				"seldom/rarely": "めったに",
+				"not at all/never": "ぜんぜん"
+			};
+			
+			var nouns = {
+				"teacher": "せんせい",
+				"newspaper": "しんぶん",
+				"university student": "だいがくせい",
+				"doctor": "いしゃ",
+				"dishes": "ちゃわん",
+				"swim": "すいえい",
+				"Korea": "かんこく",
+				"bookstore": "ほんや",
+				"vegetable": "やさい",
+				"fish": "さかな",
+				"orange": "みかん",
+				"school": "がっこう",
+				"hospital": "びょういん",
+				"hat": "ぼうし",
+				"person": "ひと",
+				"engineer": "ぎし",
+				"China": "ちゅうごく",
+				"country": "くに",
+				"job": "しごと",
+				"office": "じむしょ",
+				"station": "えき",
+				"library": "としょかん",
+				"apple": "りんご",
+				"lawyer": "べんごし",
+				"civil servant": "こうむいん",
+				"ship": "ふね",
+				"subway": "ちかてつ",
+				"secretary": "ひしょ",
+				"chair": "いす",
+				"glasses": "めがね",
+				"stamp": "きって",
+				"accountant": "かいけいし",
+				"socks": "くつした",
+				"shoes": "くつ",
+				"clock": "とけい",
+				"bank": "ぎんこう",
+				"bicycle": "じてんしゃ",
+				"history": "れきし",
+				"television": "てれび",
+				"phone": "でんわ",
+				"envelope": "ふうとう",
+				"car": "くるま",
+				"employee": "かいしゃいん",
+				"key": "かぎ",
+				"church": "きょうかい",
+				"university/college": "だいがく",
+				"post office": "ゆうびんきょく",
+				"student": "がくせい",
+				"Japan": "にほん",
+				"dog": "いぬ",
+				"music": "おんがく",
+				"pencil": "えんぴつ",
+				"study": "べんきょう",
+				"desk": "つくえ",
+				"assistant": "じょしゅ",
+				"cleaning": "そうじ",
+				"face": "かお",
+				"comics": "まんが",
+				"shopping": "かいもの",
+				"meal": "ごはん",
+				"Japanese": "にほんご",
+				"tooth": "は",
+				"strawberry": "いちご",
+				"classroom": "きょうしつ",
+				"magazine": "ざっし",
+				"movie": "えいが",
+				"money": "おかね",
+				"dinner": "ばんごはん",
+				"breakfast": "あさごはん",
+				"lunch": "ひるごはん",
+				"a little bit": "ちょっと",
+				"scissors": "はさみ",
+				"flag": "はた",
+				"gloves": "てぶくろ",
+				"umbrella": "かさ",
+				"coffee shop": "きっさてん",
+				"laundry": "せんたく",
+				"cat": "ねこ",
+				"bag": "かばん",
+				"bath": "おふろ",
+				"picture": "しゃしん",
+				"light": "でんき",
+				"friend": "ともだち",
+				"bathroom": "おてあらい",
+				"homework": "しゅくだい",
+				"park": "こうえん",
+				"window": "まど",
+				"weather": "てんき",
+				"purse": "さいふ",
+				"snow": "ゆき",
+				"home": "うち",
+				"house": "いえ",
+				"basement": "ちか",
+				"town": "まち",
+				"nothing": "なにも",
+				"when": "いつ",
+				"a lot": "たくさん",
+				"very": "とても",
+				"birthday": "たんじょうび",
+			};
+			
+			var adjectives = {
+				//I-adjectives
+				"warm": "あたたかい",
+				"new": "あたらしい",
+				"hot": "あつい",
+				"good": "いい/よい",
+				"busy": "いそがしい",
+				"delicious": "おいしい",
+				"big": "おおきい",
+				"slow/late": "おそい",
+				"heavy": "おもい",
+				"interesting/fun": "おもしろい",
+				"light": "かるい",
+				"strict": "きびしい",
+				"frightening": "こわい",
+				"cold (weather)": "さむい",
+				"cool": "すずしい",
+				"narrow/cramped": "せまい",
+				"high/expensive": "たかい",
+				"fun": "たのしい",
+				"small": "ちいさい",
+				"close": "ちかい",
+				"boring": "つまらない",
+				"cold (temperature)": "つめたい",
+				"strong": "つよい",
+				"far": "とお",
+				"long": "ながい",
+				"fast/early": "はやい",
+				"low": "ひくい",
+				"old (not for age)": "ふるい",
+				"not delicious": "まずい",
+				"short (not for height)": "みじかい",
+				"difficult": "むずかし",
+				"easy/gentle": "やさしい",
+				"cheap": "やすい",
+				"weak": "よわい",
+				"young": "わかい",
+				"slowly": "ゆっくり",
+				
+				// NA-adjectives
+				"safe": "あんぜん",
+				"simple": "かんたん",
+				"dangerous": "きけん",
+				"disliked": "きらい",
+				"beautiful/clean": "きれい",
+				"healthy/energetic": "げんき",
+				"quiet": "しずか",
+				"free (libre)": "じゆう",
+				"important": "じゅうよう",
+				"skillful": "じょうず",
+				"kind": "しんせつ",
+				"liked": "すき",
+				"nice/attractive": "すてき",
+				"bustling": "にぎやか",
+				"handsome": "ハンサム",
+				"not busy": "ひま",
+				"complicated": "ふくざつ",
+				"inconvenient": "ふべん",
+				"convenient": "べんり",
+				"serious": "まじめ",
+				"famous": "ゆうめい",
+				"late": "おそく",
+				"tough": "たいへん"
+			};
+			
+			var verbs = {
+				"to buy": "かう",
+				"to write": "かく",
+				"to listen": "きく",
+				"to go": "いく",
+				"to use": "つかう",
+				"to drink": "のむ",
+				"to read": "よむ",
+				"to understand": "わかる",
+				"to swim": "およぐ",
+				"to work": "はたらく",
+				"to speak": "はなす",
+				"to begin something": "はじめる",
+				"to brush": "みがく",
+				"to meet": "あう",
+				"to teach": "おしえる",
+				"to show": "みせる",
+				"to see/watch": "みる",
+				"to eat": "たべる",
+				"to begin": "はじまる",
+				"to sleep": "ねる",
+				"to wake up": "おきる",
+				"to come": "くる",
+				"to do": "する",
+				"to study": "べんきょうする",
+				"to make": "つくる",
+				"to wash": "あらう",
+				"to return": "かえる",
+				"to enter": "はいる",
+				"to rush": "はしる",
+				"to wait": "まつ",
+				"to turn on": "つける",
+				"to turn off": "けす",
+				"to open": "あける",
+				"to close": "しめる",
+				"to get on": "のる",
+				"to descend": "おりる",
+				"to get in": "いる",
+				"to exist": "ある",
+				"to play": "あそぶ",
+				"to hurry up": "いそぐ",
+				"to return something": "かえす",
+				"to die": "しぬ",
+				"to sit": "すわる",
+				"to stand": "たつ",
+				"to carry": "もつ",
+				"to help someone out": "てつだう",
+				"to bring a friend": "つれてくる",
+				"to phone": "でんわをかける",
+				"to cross": "わたる",
+				"to leave": "でる",
+				"to go out/depart": "でかける",
+				"to breathe/smoke": "すう",
+				"to take": "とる",
+				"to lend": "かす",
+				"to submit": "だす",
+				"to do (casual)": "やる",
+				"to rest/be absent": "やすむ",
+				"to be tired": "つかれる"
+			};
+			
+			var greetings = {
+				"Good morning.": "おはよう ございます",
+				"Good afternoon.": "こんにちわ",
+				"Good evening.": "こんばんは",
+				"How are you?": "おげんき です か",
+				"Fine, thank you.": "はい おかげさまで",
+				"Thank you very much.": "どうも ありがと ございます",
+				"You're welcome.": "どう いたしまして",
+				"Good-bye.": "さようなら",
+				"Excuse me...": "すみません",
+				"May I help you?": "いらっしゃいませ",
+				"Nice to meet you.": "どうぞ よろしく"
+			};
+			
+			var number_suffixes = {
+				"hours": "-じ",
+				"minutes": "-ふん/-ぷん",
+				"age": "-さい",
+				"year in school": "-ねんせい",
+				"floor": "-かい/-がい",
+				"day of the month": "-か/-にち",
+				"month": "-がつ",
+				"length of time": "-かん",
+				"general counting/children's age": "-つ/-っつ",
+				"people": "-にん/-り",
+				"bound things (packages/volumes)": "-さつ",
+				"flat things (sheets)": "-まい",
+				"machines": "-だい",
+				"long, thin things (rods)": "-ほん/-ぽん/-ぼん",
+				"animals": "-ひき/-ぴき/-びき",
+				"glasses": "-はい/-ぱい/-ばい"
+			};
+			
+			var location_indicators = {
+				"on top": "①の うえ",
+				"under": "①の した",
+				"to the right of": "①の みぎ",
+				"to the left of": "①の ひだり",
+				"in front of": "①の まえ",
+				"behind": "①の うしろ",
+				"inside": "①の なか",
+				"outside": "①の そと",
+				"next to": "①の となり",
+				"near": "①の そば",
+				"between": "①と ②の あいだ"
+			}
+			
+			// Runs the number game.
+			function word_game() {
+				var word;
+				var count = 0;
+				for (var prop in current_words)
+					if (Math.random() < 1/++count)
+						word = prop;
+				var hiragana = current_words[word];
+						
+				$("the_word").update((forwards)? hiragana : word);
+				var answer = new Element("span").update(" = " + ((forwards)? word : hiragana)).hide();
+				$("the_word").insert({bottom: answer});
+				Element.appear.delay((initial_delay + speed*hiragana.length), $("the_word").down("span"));
+			}
+			
+			// Sets the game to "Easy mode," "Medium mode," or "Hard mode." Also can set forwards or backwards lookup.
+			function set_mode(mode) {
+				if (mode == "easy") {
+					initial_delay = 0.75;
+					speed = 0.75;
+					$("easy").checked = true;
+				} else if (mode == "medium") {
+					initial_delay = 1;
+					speed = 0.25;
+					$("medium").checked = true;
+				} else if (mode == "hard") {
+					initial_delay = 0.5;
+					speed = 0.2;
+					$("hard").checked = true;
+				} else if (mode == "forwards") {
+					forwards = true;
+					$("forwards").checked = true;
+				} else if (mode == "backwards") {
+					forwards = false;
+					$("backwards").checked = true;
+				}
+			}
+			
+			function set_words(category) {
+				if (category ==  "time_expressions") {
+					current_words = time_expressions;
+				} else if (category == "frequency_modifiers") {
+					current_words = frequency_modifiers;
+				} else if (category == "nouns") {
+					current_words = nouns;
+				} else if (category == "adjectives") {
+					current_words = adjectives;
+				} else if (category == "verbs") {
+					current_words = verbs;
+				} else if (category == "greetings") {
+					current_words = greetings;
+				} else if (category == "number_suffixes") {
+					current_words = number_suffixes;
+				} else if (category == "location_indicators") {
+					current_words = location_indicators;
+				} else if (category == "everything") {
+					current_words = Object.extend(current_words, time_expressions);
+					current_words = Object.extend(current_words, frequency_modifiers);
+					current_words = Object.extend(current_words, nouns);
+					current_words = Object.extend(current_words, adjectives);
+					current_words = Object.extend(current_words, verbs);
+					current_words = Object.extend(current_words, greetings);
+					current_words = Object.extend(current_words, number_suffixes);
+					current_words = Object.extend(current_words, location_indicators);
+				}
+			}
+			
+			// Start the game once the page is loaded!
+			document.observe("dom:loaded", function() {
+				set_mode("easy");
+				set_mode("forwards");
+				set_words("time_expressions");
+				word_game();
+			});
+		</script>
+		<style type="text/css">
+			body {
+				margin: 2em 0em;
+				padding: 0em;
+				text-align:center;
+				font-family: Arial;
+			}
+				
+			.word {
+				width: 65em;
+				margin: 3em auto;
+				text-align: left;
+				padding: 1.5em;
+				border: 1px dashed #333;
+				background-color: #eee;
+			}
+			
+			#the_word {
+				font-size: 46pt;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>ひらがな Memorization</h1>
+		<div class="word">
+			<span id="the_word"></span><br>
+			<button onClick="word_game();">Next Word!</button>
+			<p>
+				<input type="radio" value="easy" name="mode" id="easy" onClick="set_mode('easy');"><label for="easy">Easy Mode</label>
+				<input type="radio" value="easy" name="mode" id="medium" onClick="set_mode('medium');"><label for="medium">Medium Mode</label>
+				<input type="radio" value="easy" name="mode" id="hard" onClick="set_mode('hard');"><label for="hard">Hard Mode</label>
+			</p>
+			<p>
+				<input type="radio" value="forwards" name="game_mode" id="forwards" onClick="set_mode('forwards');"><label for="forwards">Forwards (guess English from Hiragana)</label>
+				<input type="radio" value="backwards" name="game_mode" id="backwards" onClick="set_mode('backwards');"><label for="backwards">Backwards (guess Hiragana from English)</label>
+			</p>
+			<select id="type" onChange="set_words(this.value);">
+				<option value="everything">Everything</option>
+				<option value="time_expressions" selected="true">Time Expressions</option>
+				<option value="frequency_modifiers">Frequency Modifiers</option>
+				<option value="nouns">Nouns</option>
+				<option value="adjectives">Adjectives</option>
+				<option value="verbs">Verbs</option>
+				<option value="greetings">Greetings</option>
+				<option value="number_suffixes">Number Suffixes</option>
+				<option value="location_indicators">Location Indicators</option>
+			</select>
+		</div>
+		<p>
+			Guess what the ひらがな word is before time runs out and the answer is given! Longer words give you more time to think.<br>
+		</p>
+	</body>
+</html>
